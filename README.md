@@ -19,7 +19,7 @@
 
 ## Install via Terminal
 ```
-curl -s https://raw.githubusercontent.com/animegasan/luci-app-ipinfo/master/install.sh | sh
+curl -s https://raw.githubusercontent.com/bobbyunknown/luci-app-ipinfo/master/install.sh | sh
 ```
 
 # Preview
