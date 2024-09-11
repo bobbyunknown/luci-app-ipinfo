@@ -1,6 +1,6 @@
 /* This is free software, licensed under the Apache License, Version 2.0
- *
  * Copyright (C) 2024 Hilman Maulana <hilman0.0maulana@gmail.com>
+ *  Contributor: BobbyUnknown telegram https://t.me/BobbyUn_kown
  */
 
 'use strict';
@@ -17,6 +17,7 @@ return view.extend({
 		return uci.load('ipinfo').then(function() {
 			var data = uci.sections('ipinfo');
 			var jsonData = {};
+			var token = data[0].token;
 			if (data[0].enable === '0') {
 				jsonData.uci = {
 					enable: data[0].enable
@@ -36,9 +37,13 @@ return view.extend({
 						} else {
 							jsonData.uci = null;
 						};
-						return fs.exec('curl', ['-sL', 'ip.guide']).then(function(result) {
+						return fs.exec('curl', ['-sL', `api.ipgeolocation.io/ipgeo?apiKey=${token}`]).then(function(result) { // Gunakan token dari konfigurasi
 							var data = JSON.parse(result.stdout);
-							jsonData.json = data;
+							if (data.message && data.message.includes('exceeded the limit')) {
+								jsonData.error = _('Anda telah melebihi batas 1000 permintaan per hari, Silakan ganti TOKEN ANDA.');
+							} else {
+								jsonData.json = data;
+							}
 							return jsonData;
 						});
 					} else {
@@ -53,7 +58,13 @@ return view.extend({
 		var table = E('table', {'class': 'table'});
 		if (!data || Object.keys(data).length === 0) {
 			var row = E('tr', {'class': 'tr'}, [
-				E('td', {'class': 'td'}, _('No internet connection.'))
+				E('td', {'class': 'td'}, _('Gak ada internet beli paket dulu bro 😂.'))
+			]);
+			table.appendChild(row);
+			return table;
+		} else if (data.error) {
+			var row = E('tr', {'class': 'tr'}, [
+				E('td', {'class': 'td'}, _(data.error))
 			]);
 			table.appendChild(row);
 			return table;
@@ -61,46 +72,58 @@ return view.extend({
 			var hasData = false;
 			var categories = ['isp', 'loc', 'co'];
 			var propertiesToShow = {
-				'ip': _('Public IP'),
-				'network.autonomous_system.name': _('Provider'),
-				'network.autonomous_system.organization': _('Organization'),
-				'network.autonomous_system.asn': _('ASN Number'),
-				'location.city': _('City'),
-				'location.country': _('Country'),
-				'location.timezone': _('Timezone'),
-				'location.latitude': _('Latitude'),
-				'location.longitude': _('Longitude')
+				'ip': _('IP Publik'),
+				'isp': _('ISP'),
+				'organization': _('Organisasi'),
+				'country_name_official': _('Nama resmi negara'),
+				'city': _('City'),
+				'country_name': _('Negara'),
+				'time_zone.name': _('Zona Waktu'),
+				'latitude': _('Latitude'),
+				'longitude': _('Longitude')
 			};
 			var dataUci = {
 				'ip': 'ip',
-				'network.autonomous_system.name': 'name',
-				'network.autonomous_system.organization': 'organization',
-				'network.autonomous_system.asn': 'asn',
-				'location.city': 'city',
-				'location.country': 'country',
-				'location.timezone': 'timezone',
-				'location.latitude': 'latitude',
-				'location.longitude': 'longitude'
+				'isp': 'isp',
+				'organization': 'organization',
+				'country_name_official': 'country_name_official',
+				'city': 'city',
+				'country_name': 'country_name',
+				'time_zone.name': 'time_zone.name',
+				'latitude': 'latitude',
+				'longitude': 'longitude'
 			};
-			categories.forEach(function(category) {
-				if (data.uci[category]) {
-					data.uci[category].forEach(function(key) {
-						var propKey = Object.keys(dataUci).find(k => dataUci[k] === key);
-						if (propKey) {
-							hasData = true;
-							var value = propKey.split('.').reduce((o, i) => o ? o[i] : null, data.json);
-							var row = E('tr', {'class': 'tr'}, [
-								E('td', {'class': 'td left', 'width': '33%'}, propertiesToShow[propKey]),
-								E('td', {'class': 'td left'}, value || '-')
-							]);
-							table.appendChild(row);
-						}
-					});
-				}
-			});
+			if (data.json) {
+				categories.forEach(function(category) {
+					if (data.uci[category]) {
+						data.uci[category].forEach(function(key) {
+							var propKey = Object.keys(dataUci).find(k => dataUci[k] === key);
+							if (propKey) {
+								hasData = true;
+								var value = propKey.split('.').reduce((o, i) => o ? o[i] : null, data.json);
+								var displayValue = value || '-';
+								if (propKey === 'country_name' && data.json.country_emoji) {
+									displayValue += ' ' + data.json.country_emoji;
+								}
+								if (propKey === 'time_zone.name' && data.json.time_zone.current_time) {
+									displayValue += ' ' + data.json.time_zone.current_time;
+								}
+								if (propKey === 'city' && data.json.state_prov) {
+									displayValue += ' ' + data.json.state_prov;
+								}
+								var row = E('tr', {'class': 'tr'}, [
+									E('td', {'class': 'td left', 'width': '33%'}, propertiesToShow[propKey]),
+									E('td', {'class': 'td left'}, displayValue)
+								]);
+								table.appendChild(row);
+							}
+						});
+					}
+				});
+			}
 			if (!hasData) {
 				var row = E('tr', {'class': 'tr'}, [
-					E('td', {'class': 'td'}, _('No data available, please check the settings.'))
+					E('td', {'class': 'td'}, _('Tidak ada data tersedia, silakan periksa pengaturan.'))
 				]);
 				table.appendChild(row);
 			}
