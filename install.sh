@@ -10,7 +10,7 @@ if ! opkg update; then
 fi
 
 echo "Downloading $apk_name"
-if ! curl -LO "https://github.com/animegasan/$apk_name/releases/download/$version/${apk_name}_${version}_all.ipk"; then
+if ! curl -LO "https://github.com/bobbyunknown/$apk_name/releases/download/$version/${apk_name}_${version}_all.ipk"; then
     echo "Failed to download $apk_name"
     exit 1
 fi
