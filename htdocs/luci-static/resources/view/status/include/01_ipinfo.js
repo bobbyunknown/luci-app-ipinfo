@@ -76,7 +76,7 @@ return view.extend({
 				'isp': _('ISP'),
 				'organization': _('Organisasi'),
 				'country_name_official': _('Nama resmi negara'),
-				'city': _('City'),
+				'city': _('Kota'),
 				'country_name': _('Negara'),
 				'time_zone.name': _('Zona Waktu'),
 				'latitude': _('Latitude'),
