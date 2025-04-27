@@ -52,7 +52,7 @@ jobs:
     name: Build OpenWRT
     needs: job_check
     if: needs.job_check.outputs.has_update == 'true'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Install packages
         run: |
