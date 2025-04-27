@@ -56,9 +56,37 @@ return view.extend({
 	render: function (data) {
 		var container;
 		var table = E('table', {'class': 'table'});
+		
+		var style = E('style', {}, `
+			.status-label {
+				padding: 3px 8px;
+				border-radius: 3px;
+				font-weight: bold;
+				display: inline-block;
+			}
+			.status-connected {
+				background-color: #8bc34a;
+				color: white;
+			}
+			.status-disconnected {
+				background-color: #f44336;
+				color: white;
+			}
+		`);
+		document.head.appendChild(style);
+
+		var statusRow = E('tr', {'class': 'tr'}, [
+			E('td', {'class': 'td left', 'width': '33%'}, _('Status Internet')),
+			E('td', {'class': 'td left'}, 
+				data.uci && data.uci.enable === '1' && data.json ? 
+				E('span', {'class': 'status-label status-connected'}, _('Connected')) : 
+				E('span', {'class': 'status-label status-disconnected'}, _('Disconnected'))
+			)
+		]);
+		table.appendChild(statusRow);
+
 		if (!data || Object.keys(data).length === 0) {
 			var row = E('tr', {'class': 'tr'}, [
-				E('td', {'class': 'td'}, _('Gak ada internet beli paket dulu bro 😂.'))
 			]);
 			table.appendChild(row);
 			return table;
@@ -76,7 +104,7 @@ return view.extend({
 				'isp': _('ISP'),
 				'organization': _('Organisasi'),
 				'country_name_official': _('Nama resmi negara'),
-				'city': _('Kota'),
+				'city': _('City'),
 				'country_name': _('Negara'),
 				'time_zone.name': _('Zona Waktu'),
 				'latitude': _('Latitude'),
@@ -93,6 +121,32 @@ return view.extend({
 				'latitude': 'latitude',
 				'longitude': 'longitude'
 			};
+
+			function showDataWithLoading(key, label, value) {
+				var row = E('tr', {'class': 'tr'}, [
+					E('td', {'class': 'td left', 'width': '33%'}, label),
+					E('td', {'class': 'td left'}, E('div', {'class': 'loading'}, [
+						E('div', {'class': 'spinner'}),
+						E('span', {}, _('Loading...'))
+					]))
+				]);
+				table.appendChild(row);
+
+				setTimeout(() => {
+					var displayValue = value || '-';
+					if (key === 'country_name' && data.json.country_emoji) {
+						displayValue += ' ' + data.json.country_emoji;
+					}
+					if (key === 'time_zone.name' && data.json.time_zone.current_time) {
+						displayValue += ' ' + data.json.time_zone.current_time;
+					}
+					if (key === 'city' && data.json.state_prov) {
+						displayValue += ' ' + data.json.state_prov;
+					}
+					row.querySelector('.loading').textContent = displayValue;
+				}, 1000);
+			}
+
 			if (data.json) {
 				categories.forEach(function(category) {
 					if (data.uci[category]) {
@@ -101,21 +155,7 @@ return view.extend({
 							if (propKey) {
 								hasData = true;
 								var value = propKey.split('.').reduce((o, i) => o ? o[i] : null, data.json);
-								var displayValue = value || '-';
-								if (propKey === 'country_name' && data.json.country_emoji) {
-									displayValue += ' ' + data.json.country_emoji;
-								}
-								if (propKey === 'time_zone.name' && data.json.time_zone.current_time) {
-									displayValue += ' ' + data.json.time_zone.current_time;
-								}
-								if (propKey === 'city' && data.json.state_prov) {
-									displayValue += ' ' + data.json.state_prov;
-								}
-								var row = E('tr', {'class': 'tr'}, [
-									E('td', {'class': 'td left', 'width': '33%'}, propertiesToShow[propKey]),
-									E('td', {'class': 'td left'}, displayValue)
-								]);
-								table.appendChild(row);
+								showDataWithLoading(propKey, propertiesToShow[propKey], value);
 							}
 						});
 					}
