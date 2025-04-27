@@ -1,5 +1,5 @@
 config ipinfo 'config'
-	option enable '1'
+	option enable '0'
 	list isp 'ip'
 	list isp 'isp'
 	list isp 'organization'

@@ -62,7 +62,7 @@ jobs:
           release_tag="${{ steps.get_info.outputs.version }}"
           release_body="# 🚀 ${{ steps.get_info.outputs.PKG_NAME }} for OpenWRT
 
-          ## 📦 Release Version: \`${{ steps.get_info.outputs.version }}\` all
+          ## 📦 Release Version: \`${{ steps.get_info.outputs.version }}\`
 
           ### 🌟 Features:
             - Internet connect or disconnect
