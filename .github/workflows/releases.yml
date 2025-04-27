@@ -49,7 +49,7 @@ jobs:
           sed -i 's/CONFIG_USE_SSTRIP=y/# CONFIG_USE_SSTRIP is not set/' .config
           make package/${{ steps.get_info.outputs.PKG_NAME }}/compile V=s -j$(nproc) || echo "BUILD_FAILED=true" >> $GITHUB_ENV
           if [ "${{ env.BUILD_FAILED }}" != "true" ]; then
-            mv bin/packages/x86_64/base/${{ steps.get_info.outputs.PKG_NAME }}*.ipk ../${{ steps.get_info.outputs.PKG_NAME }}-${{ steps.get_info.outputs.version }}_beta_all.ipk
+            mv bin/packages/x86_64/base/${{ steps.get_info.outputs.PKG_NAME }}*.ipk ../${{ steps.get_info.outputs.PKG_NAME }}_${{ steps.get_info.outputs.version }}_all.ipk
           fi
 
       - name: Buat Rilis
@@ -87,4 +87,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release upload ${{ steps.get_info.outputs.version }} \
-            ./${{ steps.get_info.outputs.PKG_NAME }}-${{ steps.get_info.outputs.version }}_all.ipk
+            ./${{ steps.get_info.outputs.PKG_NAME }}_${{ steps.get_info.outputs.version }}_all.ipk
