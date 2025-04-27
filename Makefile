@@ -43,7 +43,7 @@ define Package/$(PKG_NAME)/install
 	$(INSTALL_CONF) ./root/etc/config/ipinfo $(1)/etc/config/
 
 	$(INSTALL_DIR) $(1)/usr/share/luci/menu.d
-	$(INSTALL_DATA) ./root/usr/share/luci/menu.d/luci-app-ipinfo $(1)/usr/share/luci/menu.d/
+	$(INSTALL_DATA) ./root/usr/share/luci/menu.d/luci-app-ipinfo.json $(1)/usr/share/luci/menu.d/
 
 	$(INSTALL_DIR) $(1)/usr/share/rpcd/acl.d
 	$(INSTALL_DATA) ./root/usr/share/rpcd/acl.d/luci-app-ipinfo.json $(1)/usr/share/rpcd/acl.d/
